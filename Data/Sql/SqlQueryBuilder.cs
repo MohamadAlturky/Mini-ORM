@@ -122,13 +122,55 @@ public class SqlQueryBuilder
         return sql;
     }
 
+    // Method to generate a SELECT query with pagination using WITH clause
+    public static string GenerateFilterQueryWithPaginationAndWithClause(
+        string viewName,
+        List<string> columns,
+        List<OrderBy> orderBy,
+        List<Where> where)
+    {
+        if (string.IsNullOrWhiteSpace(viewName) || columns == null || columns.Count == 0)
+        {
+            throw new ArgumentException("View name and columns must be provided.");
+        }
+
+        // Prepare column names for the SELECT clause
+        string columnNames = string.Join(", ", columns.Select(c => $"[{c}]"));
+
+        // Prepare WHERE clause
+        string whereClause = GenerateWhereClause(where);
+
+        // Prepare ORDER BY clause
+        string orderByClause = GenerateOrderByClause(orderBy);
+
+        if (string.IsNullOrEmpty(orderByClause))
+        {
+            throw new ArgumentException("ORDER BY clause is required for pagination.");
+        }
+
+        // Construct the final SQL query using WITH clause
+        var sql = $@"
+        WITH FilteredData AS (
+            SELECT {columnNames}, ROW_NUMBER() OVER (ORDER BY {orderByClause}) AS RowNum
+            FROM [{viewName}]
+            {(string.IsNullOrEmpty(whereClause) ? "" : $"WHERE {whereClause}")}
+        )
+        SELECT {columnNames}
+        FROM FilteredData
+        WHERE ((@Start IS NULL OR @End IS NULL) OR (RowNum BETWEEN @Start AND @End))";
+
+        Console.WriteLine(sql);
+        return sql;
+    }
+
+
     private static string GenerateWhereClause(List<Where> whereConditions)
     {
         if (whereConditions == null || whereConditions.Count == 0)
             return string.Empty;
 
         var conditions = whereConditions.Select(w =>
-            $"((@{w.ParameterName??w.Column} IS NULL) OR ([{w.Column}] {GetWhereOperation(w)} @{w.ParameterName??w.Column}))");
+            $"((@{w.ParameterName ?? w.Column} IS NULL) OR ([{w.Column}] {GetWhereOperation(w)} @{w.ParameterName ?? w.Column}))");
 
         return string.Join(" AND ", conditions);
     }

@@ -7,7 +7,11 @@ public interface IViewFilterSpecification
     List<OrderBy> OrderBy { get; set; }
     List<Where> Where { get; set; }
 }
-public interface IViewFilter { }
+public interface IViewFilter 
+{ 
+    long? Start { get; set; }
+    long? End { get; set; }
+}
 
 public interface IView { }
 

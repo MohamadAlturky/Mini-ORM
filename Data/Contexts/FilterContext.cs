@@ -90,7 +90,21 @@ public static class FilterContext
         using var connection = DbConnectionFactory.GetSqlServerConnection;
         return await connection.QueryAsync<TView>(sql, viewFilter);
     }
-    
+    public static async Task<IEnumerable<TView>> Filter<TView, TViewFilter, TViewFilterSpecification>(
+        IViewFilterSpecification viewFilterSpecification,
+        IViewFilter viewFilter)
+        where TView : IView
+        where TViewFilter : IViewFilter
+        where TViewFilterSpecification : IViewFilterSpecification
+    {
+        string sql = SqlQueryBuilder.GenerateFilterQueryWithPaginationAndWithClause(
+            viewFilterSpecification.TableName,
+            viewFilterSpecification.Columns,
+            viewFilterSpecification.OrderBy,
+            viewFilterSpecification.Where);
+        using var connection = DbConnectionFactory.GetSqlServerConnection;
+        return await connection.QueryAsync<TView>(sql, viewFilter);
+    }
     #endregion
     ///
     ///

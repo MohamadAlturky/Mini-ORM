@@ -57,4 +57,6 @@ public class ProductFilter : IViewFilter
 {
     public int? Category { get; set; }
     public string? NameLike { get; set; }
+    public long? Start { get; set; }
+    public long? End { get; set; }
 }

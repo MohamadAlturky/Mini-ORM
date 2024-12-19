@@ -8,13 +8,14 @@ class Program
     static async Task Main()
     {
         var products = await FilterContext
-        .List<ProductView,
+        .Filter<ProductView,
             ProductFilter,
             ProductFilterSpecification>(
                 new ProductFilterSpecification() ,
                 new ProductFilter()
                 {
-                    Category = 6
+                    Start = 5,
+                    // End = 8
                 });
 
         
