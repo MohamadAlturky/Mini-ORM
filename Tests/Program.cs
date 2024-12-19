@@ -1,4 +1,5 @@
-﻿using Tests;
+﻿using Data.Contexts;
+using Tests;
 
 class Program
 {
@@ -6,6 +7,29 @@ class Program
 
     static async Task Main()
     {
+        var products = await FilterContext
+        .List<ProductView,
+            ProductFilter,
+            ProductFilterSpecification>(
+                new ProductFilterSpecification() ,
+                new ProductFilter()
+                {
+                    Category = 6
+                });
+
+        
+        foreach (var item in products)
+        {
+           System.Console.WriteLine("-------------------------"); 
+           System.Console.WriteLine(); 
+           System.Console.WriteLine("product"); 
+           System.Console.WriteLine(item.Id); 
+           System.Console.WriteLine(item.Name); 
+           System.Console.WriteLine(item.Description); 
+           System.Console.WriteLine(item.Category); 
+           System.Console.WriteLine();
+           System.Console.WriteLine("-------------------------"); 
+        }
         while (true)
         {
             Console.WriteLine("Choose an action: 1) Create 2) Update 3) Delete 4) Get 5) Get All 6) Exit");

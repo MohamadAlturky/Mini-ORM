@@ -1,3 +1,5 @@
+using Core.Models.Filtering;
+
 namespace Data.Sql;
 
 public class SqlQueryBuilder
@@ -80,5 +82,82 @@ public class SqlQueryBuilder
         var sql = $"SELECT {idColumn}, {columnNames} FROM {tableName} WHERE {idColumn} = @Id;";
         Console.WriteLine(sql);
         return sql;
+    }
+
+    // Method to generate a SELECT For Filter
+    public static string GenerateFilterQuery(
+        string viewName,
+        List<string> columns,
+        List<OrderBy> orderBy,
+        List<Where> where)
+    {
+        if (string.IsNullOrWhiteSpace(viewName) || columns == null || columns.Count == 0)
+        {
+            throw new ArgumentException("View name and columns must be provided.");
+        }
+
+        // Prepare column names for the SELECT clause
+        string columnNames = string.Join(", ", columns.Select(c => $"[{c}]"));
+
+        // Prepare WHERE clause
+        string whereClause = GenerateWhereClause(where);
+
+        // Prepare ORDER BY clause
+        string orderByClause = GenerateOrderByClause(orderBy);
+
+        // Construct the final SQL query
+        var sql = $"SELECT {columnNames} FROM [{viewName}]";
+
+        if (!string.IsNullOrEmpty(whereClause))
+        {
+            sql += $"\n WHERE {whereClause}";
+        }
+
+        if (!string.IsNullOrEmpty(orderByClause))
+        {
+            sql += $"\n ORDER BY {orderByClause}";
+        }
+
+        Console.WriteLine(sql);
+        return sql;
+    }
+
+    private static string GenerateWhereClause(List<Where> whereConditions)
+    {
+        if (whereConditions == null || whereConditions.Count == 0)
+            return string.Empty;
+
+        var conditions = whereConditions.Select(w =>
+            $"((@{w.ParameterName??w.Column} IS NULL) OR ([{w.Column}] {GetWhereOperation(w)} @{w.ParameterName??w.Column}))");
+
+        return string.Join(" AND ", conditions);
+    }
+
+    private static string GetWhereOperation(Where where)
+    {
+        return where.WhereOperation switch
+        {
+            WhereOperation.Equals => "=",
+            WhereOperation.NotEquals => "<>",
+            WhereOperation.Bigger => ">",
+            WhereOperation.BiggerOrEqual => ">=",
+            WhereOperation.Smaller => "<",
+            WhereOperation.SmallerOrEqual => "<=",
+            WhereOperation.Like => "LIKE",
+            WhereOperation.In => "IN",
+            _ => throw new NotSupportedException($"The operation '{where.WhereOperation}' is not supported.")
+        };
+    }
+
+
+    private static string GenerateOrderByClause(List<OrderBy> orderBys)
+    {
+        if (orderBys == null || orderBys.Count == 0)
+            return string.Empty;
+
+        var orderClauses = orderBys.Select(o =>
+            $"[{o.Column}] {(o.DESC ? "DESC" : "ASC")}");
+
+        return string.Join(", ", orderClauses);
     }
 }
