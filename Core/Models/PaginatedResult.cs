@@ -3,5 +3,5 @@
 public class PaginatedResult<T>
 {
     public T[] Items { get; set; } = null!;
-    public int TotalCount { get; set; }
+    public long TotalCount { get; set; }
 }

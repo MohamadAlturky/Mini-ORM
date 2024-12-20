@@ -1,35 +1,76 @@
-﻿using Data.Contexts;
+﻿using Core.Models.Filtering;
+using Data.Contexts;
 using Tests;
 
 class Program
 {
+    public class ProductVw : IViewResult
+    {
+        public int Id { get; set; }
+        public string Name { get; set; }
+        public string Description { get; set; }
+        public int Category { get; set; }
+    }
+    public class ProductFilter : IQueryParameters
+    {
+        public string? NameLike { get; set; }
+        public long? Start { get; set; }
+        public long? End { get; set; }
+    }
     private static readonly ProductDataService _productDataService = new ProductDataService();
 
     static async Task Main()
     {
-        var products = await FilterContext
-        .Filter<ProductView,
-            ProductFilter,
-            ProductFilterSpecification>(
-                new ProductFilterSpecification() ,
-                new ProductFilter()
-                {
-                    Start = 5,
-                    // End = 8
-                });
-
-        
-        foreach (var item in products)
+        var products = await QueryContext.List(new Query<ProductVw>()
         {
-           System.Console.WriteLine("-------------------------"); 
-           System.Console.WriteLine(); 
-           System.Console.WriteLine("product"); 
-           System.Console.WriteLine(item.Id); 
-           System.Console.WriteLine(item.Name); 
-           System.Console.WriteLine(item.Description); 
-           System.Console.WriteLine(item.Category); 
-           System.Console.WriteLine();
-           System.Console.WriteLine("-------------------------"); 
+            Where = [
+                new()
+                {
+                    Column = nameof(ProductVw.Name),
+                    ParameterName = nameof(ProductFilter.NameLike),
+                    WhereOperation = WhereOperation.Like
+                }
+            ],
+            Columns = [
+                new()
+                {
+                    Column = nameof(ProductView.Name),
+                    As = nameof(ProductView.Name)
+                }
+            ],
+            From = "Product",
+            OrderBy = [
+                new OrderBy()
+                {
+                    Column = "Name",
+                    DESC = true
+                }
+            ],
+            GroupBy = [
+                new ()
+                {
+                    Column = "Name"
+                }
+            ]
+        }, new ProductFilter()
+        {
+            NameLike = "%o%"
+        });
+        System.Console.WriteLine();
+        System.Console.WriteLine(products.TotalCount);
+        System.Console.WriteLine();
+
+        foreach (var item in products.Items)
+        {
+            System.Console.WriteLine("-------------------------");
+            System.Console.WriteLine();
+            System.Console.WriteLine("product");
+            System.Console.WriteLine(item.Id);
+            System.Console.WriteLine(item.Name);
+            System.Console.WriteLine(item.Description);
+            System.Console.WriteLine(item.Category);
+            System.Console.WriteLine();
+            System.Console.WriteLine("-------------------------");
         }
         while (true)
         {
@@ -98,13 +139,13 @@ class Program
         }
 
         var product = await _productDataService.GetProduct(id);
-        
+
         if (product is null)
         {
             Console.WriteLine("Product not found");
             return;
         }
-        
+
         Console.WriteLine("Current product details:");
         DisplayProduct(product);
 
@@ -131,29 +172,29 @@ class Program
         };
 
         await _productDataService.UpdateProduct(updatedProduct);
-        
+
         Console.WriteLine($"Product Updated: {updatedProduct.Id}");
     }
 
     private static async Task DeleteProduct()
     {
         Console.WriteLine("Enter Product ID to delete:");
-        
+
         int id;
-        
+
         while (!int.TryParse(Console.ReadLine(), out id))
         {
             Console.WriteLine("Invalid input. Please enter a valid Product ID:");
         }
 
         var product = await _productDataService.GetProduct(id);
-        
+
         if (product is null)
         {
             Console.WriteLine("Product not found");
             return;
         }
-        
+
         Console.WriteLine("Current product details:");
         DisplayProduct(product);
 
@@ -165,47 +206,47 @@ class Program
     private static async Task GetProduct()
     {
         Console.WriteLine("Enter Product ID to retrieve:");
-        
+
         int id;
-        
+
         while (!int.TryParse(Console.ReadLine(), out id))
         {
             Console.WriteLine("Invalid input. Please enter a valid Product ID:");
         }
 
         var product = await _productDataService.GetProduct(id);
-        
+
         if (product is null)
         {
             Console.WriteLine("Product not found");
             return;
         }
-        
-       DisplayProduct(product);
+
+        DisplayProduct(product);
     }
 
     private static async Task GetAllProducts()
     {
-       IEnumerable<Product> products = await _productDataService.GetAllProducts();
-       
-       if (products == null || !products.Any())
-       {
-           Console.WriteLine("No products found.");
-           return;
-       }
-       
-       foreach (var product in products)
-       {
-           DisplayProduct(product);
-       }
-   }
+        IEnumerable<Product> products = await _productDataService.GetAllProducts();
 
-   private static void DisplayProduct(Product product)
-   {
-       Console.WriteLine($"Id: {product.Id}");
-       Console.WriteLine($"Name: {product.Name}");
-       Console.WriteLine($"Description: {product.Description}");
-       Console.WriteLine($"Category: {product.Category}");
-       Console.WriteLine("---------------------------");
-   }
+        if (products == null || !products.Any())
+        {
+            Console.WriteLine("No products found.");
+            return;
+        }
+
+        foreach (var product in products)
+        {
+            DisplayProduct(product);
+        }
+    }
+
+    private static void DisplayProduct(Product product)
+    {
+        Console.WriteLine($"Id: {product.Id}");
+        Console.WriteLine($"Name: {product.Name}");
+        Console.WriteLine($"Description: {product.Description}");
+        Console.WriteLine($"Category: {product.Category}");
+        Console.WriteLine("---------------------------");
+    }
 }

@@ -87,7 +87,7 @@ public class SqlQueryBuilder
     // Method to generate a SELECT For Filter
     public static string GenerateFilterQuery(
         string viewName,
-        List<string> columns,
+        List<ColumnClause> columns,
         List<OrderBy> orderBy,
         List<Where> where)
     {
@@ -97,7 +97,7 @@ public class SqlQueryBuilder
         }
 
         // Prepare column names for the SELECT clause
-        string columnNames = string.Join(", ", columns.Select(c => $"[{c}]"));
+        string columnNames = string.Join(", ", columns.Select(c => $"[{c.Column}] AS {c.As??c.Column}"));
 
         // Prepare WHERE clause
         string whereClause = GenerateWhereClause(where);
@@ -125,7 +125,7 @@ public class SqlQueryBuilder
     // Method to generate a SELECT query with pagination using WITH clause
     public static string GenerateFilterQueryWithPaginationAndWithClause(
         string viewName,
-        List<string> columns,
+        List<ColumnClause> columns,
         List<OrderBy> orderBy,
         List<Where> where)
     {
@@ -135,7 +135,7 @@ public class SqlQueryBuilder
         }
 
         // Prepare column names for the SELECT clause
-        string columnNames = string.Join(", ", columns.Select(c => $"[{c}]"));
+        string columnNames = string.Join(", ", columns.Select(c => $"[{c.Column}] AS {c.As??c.Column}"));
 
         // Prepare WHERE clause
         string whereClause = GenerateWhereClause(where);

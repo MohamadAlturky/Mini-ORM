@@ -13,12 +13,12 @@ public class ProductView : IView
 public class ProductFilterSpecification : IViewFilterSpecification
 {
     public string TableName { get; set; } = nameof(Product); // The name of the table/view.
-    public List<string> Columns { get; set; } = new List<string>
+    public List<ColumnClause> Columns { get; set; } = new List<ColumnClause>
         {
-            nameof(Product.Id),
-            nameof(Product.Name),
-            nameof(Product.Description),
-            nameof(Product.Category)
+            new() { Column = nameof(Product.Id), As = nameof(Product.Id)},
+            new() { Column = nameof(Product.Name), As = nameof(Product.Name)},
+            new() { Column = nameof(Product.Description), As = nameof(Product.Description)},
+            new() { Column = nameof(Product.Category)}
         }; // Columns available for selection.
 
     public List<OrderBy> OrderBy { get; set; }
