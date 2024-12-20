@@ -1,3 +1,5 @@
+using System.Linq.Expressions;
+
 namespace Core.Models.Filtering;
 
 public interface IViewFilterSpecification
@@ -31,6 +33,7 @@ public class Where
     public string Column { get; set; } = string.Empty;
     public string? ParameterName { get; set; }
     public WhereOperation WhereOperation { get; set; }
+    public ExpressionType ExpressionType { get; set; }
 }
 
 public enum WhereOperation
