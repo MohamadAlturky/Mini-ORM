@@ -30,9 +30,9 @@ public static class SpecificationGenerator
         {
             specifications.Add(new Specification
             {
-                Left = GetExpressionValue(binaryExpression.Left),
+                Left = GetExpressionName(binaryExpression.Left),
                 ExpressionType = binaryExpression.NodeType,
-                Right = GetExpressionValue(binaryExpression.Right)
+                Right = EvaluateExpression(binaryExpression.Right)
             });
         }
 
@@ -41,8 +41,16 @@ public static class SpecificationGenerator
             ParseBinaryExpression(rightBinary, specifications);
         }
     }
+    // Method to evaluate an expression and return its value
+    private static object EvaluateExpression(Expression expression)
+    {
+        // Compile and execute the expression
+        var lambda = Expression.Lambda<Func<object>>(Expression.Convert(expression, typeof(object)));
+        var compiledLambda = lambda.Compile();
 
-    private static string GetExpressionValue(Expression expression)
+        return compiledLambda();
+    }
+    private static string GetExpressionName(Expression expression)
     {
         switch (expression)
         {
@@ -53,7 +61,7 @@ public static class SpecificationGenerator
                 return constantExpression.Value?.ToString() ?? "null";
 
             case UnaryExpression unaryExpression:
-                return GetExpressionValue(unaryExpression.Operand);
+                return GetExpressionName(unaryExpression.Operand);
 
             default:
                 return $"Unsupported expression: {expression}";

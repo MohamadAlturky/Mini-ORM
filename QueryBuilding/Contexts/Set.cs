@@ -98,6 +98,10 @@ public class Set<T>
             Where = _whereClause
         });
         System.Console.WriteLine(generated.sql);
+        foreach (var item in generated.parameters)
+        {
+            System.Console.WriteLine($"{item.Key} = {item.Value}");
+        }
         var result = await connection.QueryAsync<T>(generated.sql,generated.parameters);
         return result.ToList();
     }
