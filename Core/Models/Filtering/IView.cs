@@ -31,9 +31,10 @@ public class ColumnClause
 public class Where
 {
     public string Column { get; set; } = string.Empty;
-    public string? ParameterName { get; set; }
-    public WhereOperation WhereOperation { get; set; }
+    //public string? ParameterName { get; set; }
+    //public WhereOperation WhereOperation { get; set; }
     public ExpressionType ExpressionType { get; set; }
+    public object Value { get; set; }
 }
 
 public enum WhereOperation

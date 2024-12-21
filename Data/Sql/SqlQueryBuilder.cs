@@ -1,205 +1,205 @@
-using Core.Models.Filtering;
+// using Core.Models.Filtering;
 
-namespace Data.Sql;
+// namespace Data.Sql;
 
-public class SqlQueryBuilder
-{
-    // Method to generate an INSERT query
-    public static string GenerateInsertQuery(string tableName, List<string> columns)
-    {
-        if (string.IsNullOrWhiteSpace(tableName) || columns == null || columns.Count == 0)
-        {
-            throw new ArgumentException("Table name and columns must be provided.");
-        }
+// public class SqlQueryBuilder
+// {
+//     // Method to generate an INSERT query
+//     public static string GenerateInsertQuery(string tableName, List<string> columns)
+//     {
+//         if (string.IsNullOrWhiteSpace(tableName) || columns == null || columns.Count == 0)
+//         {
+//             throw new ArgumentException("Table name and columns must be provided.");
+//         }
 
-        string columnNames = string.Join(", ", columns.ConvertAll(c => "[" + c + "]"));
-        string parameterPlaceholders = string.Join(", ", columns.ConvertAll(c => "@" + c));
-        var sql = $"INSERT INTO {tableName} ({columnNames}) VALUES ({parameterPlaceholders}) SELECT CAST(SCOPE_IDENTITY() AS INT);";
-        Console.WriteLine(sql);
-        return sql;
-    }
+//         string columnNames = string.Join(", ", columns.ConvertAll(c => "[" + c + "]"));
+//         string parameterPlaceholders = string.Join(", ", columns.ConvertAll(c => "@" + c));
+//         var sql = $"INSERT INTO {tableName} ({columnNames}) VALUES ({parameterPlaceholders}) SELECT CAST(SCOPE_IDENTITY() AS INT);";
+//         Console.WriteLine(sql);
+//         return sql;
+//     }
 
-    // Method to generate an UPDATE query
-    public static string GenerateUpdateQuery(string tableName, List<string> columns)
-    {
-        string idColumn = "[Id]";
-        if (string.IsNullOrWhiteSpace(tableName) || columns == null || columns.Count == 0 || string.IsNullOrWhiteSpace(idColumn))
-        {
-            throw new ArgumentException("Table name, columns, and ID column must be provided.");
-        }
+//     // Method to generate an UPDATE query
+//     public static string GenerateUpdateQuery(string tableName, List<string> columns)
+//     {
+//         string idColumn = "[Id]";
+//         if (string.IsNullOrWhiteSpace(tableName) || columns == null || columns.Count == 0 || string.IsNullOrWhiteSpace(idColumn))
+//         {
+//             throw new ArgumentException("Table name, columns, and ID column must be provided.");
+//         }
 
-        // Constructing the SET clause
-        var setClauses = new List<string>();
-        foreach (var column in columns)
-        {
-            setClauses.Add($"[{column}] = @{column}");
-        }
+//         // Constructing the SET clause
+//         var setClauses = new List<string>();
+//         foreach (var column in columns)
+//         {
+//             setClauses.Add($"[{column}] = @{column}");
+//         }
 
-        string setClause = string.Join(", ", setClauses);
-        var sql = $"UPDATE {tableName} SET {setClause} WHERE {idColumn} = @Id;";
-        Console.WriteLine(sql);
-        return sql;
-    }
+//         string setClause = string.Join(", ", setClauses);
+//         var sql = $"UPDATE {tableName} SET {setClause} WHERE {idColumn} = @Id;";
+//         Console.WriteLine(sql);
+//         return sql;
+//     }
 
-    // Method to generate a DELETE query
-    public static string GenerateDeleteQuery(string tableName)
-    {
-        string idColumn = "[Id]";
-        if (string.IsNullOrWhiteSpace(tableName) || string.IsNullOrWhiteSpace(idColumn))
-        {
-            throw new ArgumentException("Table name and ID column must be provided.");
-        }
-        var sql = $"DELETE FROM {tableName} WHERE {idColumn} = @Id;";
-        Console.WriteLine(sql);
-        return sql;
-    }
-    // Method to generate a SELECT ALL query
-    public static string GenerateSelectAllQuery(string tableName, List<string> columns)
-    {
-        string idColumn = "[Id]";
+//     // Method to generate a DELETE query
+//     public static string GenerateDeleteQuery(string tableName)
+//     {
+//         string idColumn = "[Id]";
+//         if (string.IsNullOrWhiteSpace(tableName) || string.IsNullOrWhiteSpace(idColumn))
+//         {
+//             throw new ArgumentException("Table name and ID column must be provided.");
+//         }
+//         var sql = $"DELETE FROM {tableName} WHERE {idColumn} = @Id;";
+//         Console.WriteLine(sql);
+//         return sql;
+//     }
+//     // Method to generate a SELECT ALL query
+//     public static string GenerateSelectAllQuery(string tableName, List<string> columns)
+//     {
+//         string idColumn = "[Id]";
 
-        if (string.IsNullOrWhiteSpace(tableName) || columns == null || columns.Count == 0)
-        {
-            throw new ArgumentException("Table name and columns must be provided.");
-        }
-        string columnNames = string.Join(", ", columns.ConvertAll(c => "[" + c + "]"));
+//         if (string.IsNullOrWhiteSpace(tableName) || columns == null || columns.Count == 0)
+//         {
+//             throw new ArgumentException("Table name and columns must be provided.");
+//         }
+//         string columnNames = string.Join(", ", columns.ConvertAll(c => "[" + c + "]"));
 
-        var sql = $"SELECT {idColumn}, {columnNames} FROM {tableName};";
-        Console.WriteLine(sql);
-        return sql;
-    }
+//         var sql = $"SELECT {idColumn}, {columnNames} FROM {tableName};";
+//         Console.WriteLine(sql);
+//         return sql;
+//     }
 
-    // Method to generate a SELECT BY ID query
-    public static string GenerateSelectByIdQuery(string tableName, List<string> columns)
-    {
-        string idColumn = "[Id]";
-        if (string.IsNullOrWhiteSpace(tableName) || columns == null || columns.Count == 0)
-        {
-            throw new ArgumentException("Table name and columns must be provided.");
-        }
-        string columnNames = string.Join(", ", columns.ConvertAll(c => "[" + c + "]"));
+//     // Method to generate a SELECT BY ID query
+//     public static string GenerateSelectByIdQuery(string tableName, List<string> columns)
+//     {
+//         string idColumn = "[Id]";
+//         if (string.IsNullOrWhiteSpace(tableName) || columns == null || columns.Count == 0)
+//         {
+//             throw new ArgumentException("Table name and columns must be provided.");
+//         }
+//         string columnNames = string.Join(", ", columns.ConvertAll(c => "[" + c + "]"));
 
-        var sql = $"SELECT {idColumn}, {columnNames} FROM {tableName} WHERE {idColumn} = @Id;";
-        Console.WriteLine(sql);
-        return sql;
-    }
+//         var sql = $"SELECT {idColumn}, {columnNames} FROM {tableName} WHERE {idColumn} = @Id;";
+//         Console.WriteLine(sql);
+//         return sql;
+//     }
 
-    // Method to generate a SELECT For Filter
-    public static string GenerateFilterQuery(
-        string viewName,
-        List<ColumnClause> columns,
-        List<OrderBy> orderBy,
-        List<Where> where)
-    {
-        if (string.IsNullOrWhiteSpace(viewName) || columns == null || columns.Count == 0)
-        {
-            throw new ArgumentException("View name and columns must be provided.");
-        }
+//     // Method to generate a SELECT For Filter
+//     public static string GenerateFilterQuery(
+//         string viewName,
+//         List<ColumnClause> columns,
+//         List<OrderBy> orderBy,
+//         List<Where> where)
+//     {
+//         if (string.IsNullOrWhiteSpace(viewName) || columns == null || columns.Count == 0)
+//         {
+//             throw new ArgumentException("View name and columns must be provided.");
+//         }
 
-        // Prepare column names for the SELECT clause
-        string columnNames = string.Join(", ", columns.Select(c => $"[{c.Column}] AS {c.As??c.Column}"));
+//         // Prepare column names for the SELECT clause
+//         string columnNames = string.Join(", ", columns.Select(c => $"[{c.Column}] AS {c.As??c.Column}"));
 
-        // Prepare WHERE clause
-        string whereClause = GenerateWhereClause(where);
+//         // Prepare WHERE clause
+//         string whereClause = GenerateWhereClause(where);
 
-        // Prepare ORDER BY clause
-        string orderByClause = GenerateOrderByClause(orderBy);
+//         // Prepare ORDER BY clause
+//         string orderByClause = GenerateOrderByClause(orderBy);
 
-        // Construct the final SQL query
-        var sql = $"SELECT {columnNames} FROM [{viewName}]";
+//         // Construct the final SQL query
+//         var sql = $"SELECT {columnNames} FROM [{viewName}]";
 
-        if (!string.IsNullOrEmpty(whereClause))
-        {
-            sql += $"\n WHERE {whereClause}";
-        }
+//         if (!string.IsNullOrEmpty(whereClause))
+//         {
+//             sql += $"\n WHERE {whereClause}";
+//         }
 
-        if (!string.IsNullOrEmpty(orderByClause))
-        {
-            sql += $"\n ORDER BY {orderByClause}";
-        }
+//         if (!string.IsNullOrEmpty(orderByClause))
+//         {
+//             sql += $"\n ORDER BY {orderByClause}";
+//         }
 
-        Console.WriteLine(sql);
-        return sql;
-    }
+//         Console.WriteLine(sql);
+//         return sql;
+//     }
 
-    // Method to generate a SELECT query with pagination using WITH clause
-    public static string GenerateFilterQueryWithPaginationAndWithClause(
-        string viewName,
-        List<ColumnClause> columns,
-        List<OrderBy> orderBy,
-        List<Where> where)
-    {
-        if (string.IsNullOrWhiteSpace(viewName) || columns == null || columns.Count == 0)
-        {
-            throw new ArgumentException("View name and columns must be provided.");
-        }
+//     // Method to generate a SELECT query with pagination using WITH clause
+//     public static string GenerateFilterQueryWithPaginationAndWithClause(
+//         string viewName,
+//         List<ColumnClause> columns,
+//         List<OrderBy> orderBy,
+//         List<Where> where)
+//     {
+//         if (string.IsNullOrWhiteSpace(viewName) || columns == null || columns.Count == 0)
+//         {
+//             throw new ArgumentException("View name and columns must be provided.");
+//         }
 
-        // Prepare column names for the SELECT clause
-        string columnNames = string.Join(", ", columns.Select(c => $"[{c.Column}] AS {c.As??c.Column}"));
+//         // Prepare column names for the SELECT clause
+//         string columnNames = string.Join(", ", columns.Select(c => $"[{c.Column}] AS {c.As??c.Column}"));
 
-        // Prepare WHERE clause
-        string whereClause = GenerateWhereClause(where);
+//         // Prepare WHERE clause
+//         string whereClause = GenerateWhereClause(where);
 
-        // Prepare ORDER BY clause
-        string orderByClause = GenerateOrderByClause(orderBy);
+//         // Prepare ORDER BY clause
+//         string orderByClause = GenerateOrderByClause(orderBy);
 
-        if (string.IsNullOrEmpty(orderByClause))
-        {
-            throw new ArgumentException("ORDER BY clause is required for pagination.");
-        }
+//         if (string.IsNullOrEmpty(orderByClause))
+//         {
+//             throw new ArgumentException("ORDER BY clause is required for pagination.");
+//         }
 
-        // Construct the final SQL query using WITH clause
-        var sql = $@"
-        WITH FilteredData AS (
-            SELECT {columnNames}, ROW_NUMBER() OVER (ORDER BY {orderByClause}) AS RowNum
-            FROM [{viewName}]
-            {(string.IsNullOrEmpty(whereClause) ? "" : $"WHERE {whereClause}")}
-        )
-        SELECT {columnNames}
-        FROM FilteredData
-        WHERE ((@Start IS NULL OR @End IS NULL) OR (RowNum BETWEEN @Start AND @End))";
+//         // Construct the final SQL query using WITH clause
+//         var sql = $@"
+//         WITH FilteredData AS (
+//             SELECT {columnNames}, ROW_NUMBER() OVER (ORDER BY {orderByClause}) AS RowNum
+//             FROM [{viewName}]
+//             {(string.IsNullOrEmpty(whereClause) ? "" : $"WHERE {whereClause}")}
+//         )
+//         SELECT {columnNames}
+//         FROM FilteredData
+//         WHERE ((@Start IS NULL OR @End IS NULL) OR (RowNum BETWEEN @Start AND @End))";
 
-        Console.WriteLine(sql);
-        return sql;
-    }
-
-
-    private static string GenerateWhereClause(List<Where> whereConditions)
-    {
-        if (whereConditions == null || whereConditions.Count == 0)
-            return string.Empty;
-
-        var conditions = whereConditions.Select(w =>
-            $"((@{w.ParameterName ?? w.Column} IS NULL) OR ([{w.Column}] {GetWhereOperation(w)} @{w.ParameterName ?? w.Column}))");
-
-        return string.Join(" AND ", conditions);
-    }
-
-    private static string GetWhereOperation(Where where)
-    {
-        return where.WhereOperation switch
-        {
-            WhereOperation.Equals => "=",
-            WhereOperation.NotEquals => "<>",
-            WhereOperation.Bigger => ">",
-            WhereOperation.BiggerOrEqual => ">=",
-            WhereOperation.Smaller => "<",
-            WhereOperation.SmallerOrEqual => "<=",
-            WhereOperation.Like => "LIKE",
-            WhereOperation.In => "IN",
-            _ => throw new NotSupportedException($"The operation '{where.WhereOperation}' is not supported.")
-        };
-    }
+//         Console.WriteLine(sql);
+//         return sql;
+//     }
 
 
-    private static string GenerateOrderByClause(List<OrderBy> orderBys)
-    {
-        if (orderBys == null || orderBys.Count == 0)
-            return string.Empty;
+//     private static string GenerateWhereClause(List<Where> whereConditions)
+//     {
+//         if (whereConditions == null || whereConditions.Count == 0)
+//             return string.Empty;
 
-        var orderClauses = orderBys.Select(o =>
-            $"[{o.Column}] {(o.DESC ? "DESC" : "ASC")}");
+//         var conditions = whereConditions.Select(w =>
+//             $"((@{w.ParameterName ?? w.Column} IS NULL) OR ([{w.Column}] {GetWhereOperation(w)} @{w.ParameterName ?? w.Column}))");
 
-        return string.Join(", ", orderClauses);
-    }
-}
+//         return string.Join(" AND ", conditions);
+//     }
+
+//     private static string GetWhereOperation(Where where)
+//     {
+//         return where.WhereOperation switch
+//         {
+//             WhereOperation.Equals => "=",
+//             WhereOperation.NotEquals => "<>",
+//             WhereOperation.Bigger => ">",
+//             WhereOperation.BiggerOrEqual => ">=",
+//             WhereOperation.Smaller => "<",
+//             WhereOperation.SmallerOrEqual => "<=",
+//             WhereOperation.Like => "LIKE",
+//             WhereOperation.In => "IN",
+//             _ => throw new NotSupportedException($"The operation '{where.WhereOperation}' is not supported.")
+//         };
+//     }
+
+
+//     private static string GenerateOrderByClause(List<OrderBy> orderBys)
+//     {
+//         if (orderBys == null || orderBys.Count == 0)
+//             return string.Empty;
+
+//         var orderClauses = orderBys.Select(o =>
+//             $"[{o.Column}] {(o.DESC ? "DESC" : "ASC")}");
+
+//         return string.Join(", ", orderClauses);
+//     }
+// }
