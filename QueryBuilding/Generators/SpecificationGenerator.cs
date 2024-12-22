@@ -41,10 +41,8 @@ public static class SpecificationGenerator
             ParseBinaryExpression(rightBinary, specifications);
         }
     }
-    // Method to evaluate an expression and return its value
     private static object EvaluateExpression(Expression expression)
     {
-        // Compile and execute the expression
         var lambda = Expression.Lambda<Func<object>>(Expression.Convert(expression, typeof(object)));
         var compiledLambda = lambda.Compile();
 

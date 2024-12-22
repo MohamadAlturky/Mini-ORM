@@ -1,32 +1,51 @@
 ﻿using System.Text;
 using Microsoft.Data.SqlClient;
 using QueryBuilding.Contexts;
+using QueryBuilding.Models;
 
 using var connection = new SqlConnection("Server=DESKTOP-OO326C9\\SQLEXPRESS01;Database=Test;User id=sa; Password=A@123456789; MultipleActiveResultSets=true;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False;Trusted_Connection=false");
 connection.Open();
 
 int? id = 2;
 id = null;
-byte? category = 1;
+byte? category = 2;
 // category = null;
 string? name = "%a%";
 // name = null;
+int? take = 6;
+take = null;
 
-var query = DataTable<Product>
+long? skip = 1;
+skip = null;
+var query = DataTableContext<Product>
         .Query()
-        .Where
-        (
+        .From($"Product")
+        .Where(
             e => e.Id == id && 
-            e.Category == category 
-        )
+            e.Category == category)
         .Like(e=>e.Name == name)
         .OrderBy(e=>e.Id)
-        .OrderByDescending(e=>e.Name);
+        .OrderByDescending(e=>e.Name)
+        .Take(take)
+        .Skip(skip);
 
 List<Product> result = await query.ToList(connection);
+Console.WriteLine();
+Console.WriteLine();
+
+var count = await query.Count(connection);
+Console.WriteLine();
+Console.WriteLine();
 
 var jsonResult = SampleClass.ConvertToJson(result);
+Console.WriteLine();
+Console.WriteLine();
 Console.WriteLine(jsonResult);
+Console.WriteLine();
+Console.WriteLine();
+Console.WriteLine($"count = {count}");
+Console.WriteLine();
+Console.WriteLine();
 
 // foreach (var item in result)
 // {
@@ -44,8 +63,7 @@ public class Product
     public int Id { get; set; }
     public string Name { get; set; }
     public string Description { get; set; }
-    public int Category { get; set; }
-}
+    public int Category { get; set; }}
 
 public static class SampleClass
 {
@@ -91,10 +109,3 @@ public static class SampleClass
     }
 }
 
-public static class DataTable<T>
-{
-    public static Set<T> Query()
-    {
-        return new Set<T>();
-    }
-}

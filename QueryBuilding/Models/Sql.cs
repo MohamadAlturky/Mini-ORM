@@ -3,6 +3,11 @@ using System.Linq.Expressions;
 namespace QueryBuilding.Models;
 
 
+public interface IDataTable
+{
+    string From { get; set; }
+}
+
 public enum OrderByType
 {
     ASC,

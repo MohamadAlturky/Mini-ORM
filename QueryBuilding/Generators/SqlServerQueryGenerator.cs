@@ -68,17 +68,17 @@ public static class SqlServerQueryGenerator
             }
         }
 
-        // Add GROUP BY if any
-        if (query.GroupBy.Any())
-        {
-            sql += $" GROUP BY {GetGroupBy(query.GroupBy)}";
-        }
+        // // Add GROUP BY if any
+        // if (query.GroupBy.Any())
+        // {
+        //     sql += $" GROUP BY {GetGroupBy(query.GroupBy)}";
+        // }
 
-        // Add ORDER BY if any
-        if (query.OrderBy.Any())
-        {
-            sql += $" ORDER BY {GetOrderBy(query.OrderBy)}";
-        }
+        // // Add ORDER BY if any
+        // if (query.OrderBy.Any())
+        // {
+        //     sql += $" ORDER BY {GetOrderBy(query.OrderBy)}";
+        // }
         return (sql, parameters);
     }
 
@@ -96,9 +96,9 @@ public static class SqlServerQueryGenerator
             var w = whereConditions[i];
             if (w.Value is not null)
             {
-                var paramName = $"@p{i + 1}"; // Create distinct parameter names
+                var paramName = $"@p{i + 1}"; 
                 conditions.Add($"[{w.Column}] {GetSqlOperator(w.ExpressionType)} {paramName}");
-                parameters[paramName] = w.Value; // Add parameter to dictionary
+                parameters[paramName] = w.Value;
             }
         }
         if (conditions.Count == 0)

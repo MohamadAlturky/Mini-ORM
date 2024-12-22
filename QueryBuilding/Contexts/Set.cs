@@ -3,7 +3,6 @@ using Dapper;
 using System.Linq.Expressions;
 using QueryBuilding.Generators;
 using QueryBuilding.Models;
-using System.Text.Json;
 
 namespace QueryBuilding.Contexts;
 
@@ -12,10 +11,10 @@ public class Set<T>
     private readonly List<Expression<Func<T, bool>>> _where = [];
     private readonly List<Where> _whereClause = [];
     private readonly List<OrderBy> _orderBy = [];
-    private long? _count;
+    private int? _count;
     private long? _skip;
     private readonly List<GroupBy> _groupby = [];
-    private readonly string _viewName = $"dbo.[{typeof(T).Name}]";
+    private string _viewName = $"dbo.[{typeof(T).Name}]";
     private readonly List<Column> _columns = PropertyNameGenerator.GetClassPropertyNames<T>()
         .Select(e => new Column() { Name = e }).ToList();
     public Set<T> Where(Expression<Func<T, bool>> action)
@@ -73,20 +72,20 @@ public class Set<T>
         });
         return this;
     }
-    public Set<T> GroupBy(Expression<Func<T, object>> action)
-    {
-        _groupby.Add(new()
-        {
-            ColumnName = PropertyNameGenerator.GetPropertyName(action)
-        });
-        return this;
-    }
-    public Set<T> Take(long count)
+    // public Set<T> GroupBy(Expression<Func<T, object>> action)
+    // {
+    //     _groupby.Add(new()
+    //     {
+    //         ColumnName = PropertyNameGenerator.GetPropertyName(action)
+    //     });
+    //     return this;
+    // }
+    public Set<T> Take(int? count)
     {
         _count = count;
         return this;
     }
-    public Set<T> Skip(long skip)
+    public Set<T> Skip(long? skip)
     {
         _skip = skip;
         return this;
@@ -103,6 +102,11 @@ public class Set<T>
             Take = _count,
             Where = _whereClause
         });
+    }
+    public Set<T>  From(string sql)
+    {
+        _viewName = sql;
+        return this;
     }
     public async Task<List<T>> ToList(IDbConnection connection)
     {
@@ -123,6 +127,26 @@ public class Set<T>
         }
         var result = await connection.QueryAsync<T>(generated.sql, generated.parameters);
         return result.ToList();
+    }
+    public async Task<long> Count(IDbConnection connection)
+    {
+        var generated = SqlServerQueryGenerator.GenerateCountSql(new Query()
+        {
+            Columns = _columns,
+            GroupBy = _groupby,
+            OrderBy = _orderBy,
+            Skip = _skip,
+            TableName = _viewName,
+            Take = _count,
+            Where = _whereClause
+        });
+        System.Console.WriteLine(generated.sql);
+        foreach (var item in generated.parameters)
+        {
+            System.Console.WriteLine($"{item.Key} = {item.Value}");
+        }
+        var result = await connection.QueryFirstOrDefaultAsync<long>(generated.sql, generated.parameters);
+        return result;
     }
     public static Set<T> Query()
     {
