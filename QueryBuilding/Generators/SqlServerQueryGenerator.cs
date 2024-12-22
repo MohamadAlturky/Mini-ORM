@@ -16,7 +16,12 @@ public static class SqlServerQueryGenerator
         // Add WHERE conditions if any
         if (query.Where.Any())
         {
-            sql += $" WHERE {GetWhereConditions(query.Where, parameters)}";
+            var whereConditions = GetWhereConditions(query.Where, parameters);
+            if (whereConditions != string.Empty)
+            {
+
+                sql += $" WHERE {whereConditions}";
+            }
         }
 
         // Add GROUP BY if any
@@ -44,7 +49,7 @@ public static class SqlServerQueryGenerator
         }
         return (sql, parameters);
     }
-public static (string sql, Dictionary<string, object> parameters) GenerateCountSql(Query query)
+    public static (string sql, Dictionary<string, object> parameters) GenerateCountSql(Query query)
     {
         if (query is null)
             throw new ArgumentNullException(nameof(query));
@@ -55,7 +60,12 @@ public static (string sql, Dictionary<string, object> parameters) GenerateCountS
         // Add WHERE conditions if any
         if (query.Where.Any())
         {
-            sql += $" WHERE {GetWhereConditions(query.Where, parameters)}";
+            var whereConditions = GetWhereConditions(query.Where, parameters);
+            if (whereConditions != string.Empty)
+            {
+
+                sql += $" WHERE {whereConditions}";
+            }
         }
 
         // Add GROUP BY if any
@@ -79,35 +89,60 @@ public static (string sql, Dictionary<string, object> parameters) GenerateCountS
 
     private static string GetWhereConditions(List<Where> whereConditions, Dictionary<string, object> parameters)
     {
-        var conditions = new List<string>();
-        
+        List<string> conditions = [];
+
         for (int i = 0; i < whereConditions.Count; i++)
         {
             var w = whereConditions[i];
-            var paramName = $"@p{i + 1}"; // Create distinct parameter names
-            conditions.Add($"[{w.Column}] {GetSqlOperator(w.ExpressionType)} {paramName}");
-            parameters[paramName] = w.Value; // Add parameter to dictionary
+            if (w.Value is not null)
+            {
+                var paramName = $"@p{i + 1}"; // Create distinct parameter names
+                conditions.Add($"[{w.Column}] {GetSqlOperator(w.ExpressionType)} {paramName}");
+                parameters[paramName] = w.Value; // Add parameter to dictionary
+            }
         }
-
+        if (conditions.Count == 0)
+        {
+            return string.Empty;
+        }
         return string.Join(" AND ", conditions);
     }
 
-    private static string GetSqlOperator(ExpressionType expressionType)
+    private static string GetSqlOperator(WhereExpressionType expressionType)
     {
         return expressionType switch
         {
-            ExpressionType.Equal => "=",
-            ExpressionType.NotEqual => "<>",
-            ExpressionType.GreaterThan => ">",
-            ExpressionType.GreaterThanOrEqual => ">=",
-            ExpressionType.LessThan => "<",
-            ExpressionType.LessThanOrEqual => "<=",
-            ExpressionType.AndAlso => "AND",
-            ExpressionType.OrElse => "OR",
+            WhereExpressionType.Equal => "=",
+            WhereExpressionType.NotEqual => "<>",
+            WhereExpressionType.GreaterThan => ">",
+            WhereExpressionType.GreaterThanOrEqual => ">=",
+            WhereExpressionType.LessThan => "<",
+            WhereExpressionType.LessThanOrEqual => "<=",
+            WhereExpressionType.AndAlso => "AND",
+            WhereExpressionType.OrElse => "OR",
+            WhereExpressionType.Like => "LIKE",
             _ => throw new NotSupportedException($"Operator {expressionType} is not supported.")
         };
     }
-
+    public static WhereExpressionType GetWhereExpressionType(ExpressionType expressionType, bool isLike = false)
+    {
+        if(isLike)
+        {
+            return WhereExpressionType.Like;
+        }
+        return expressionType switch
+        {
+            ExpressionType.Equal => WhereExpressionType.Equal,
+            ExpressionType.NotEqual => WhereExpressionType.NotEqual,
+            ExpressionType.GreaterThan => WhereExpressionType.GreaterThan,
+            ExpressionType.GreaterThanOrEqual => WhereExpressionType.GreaterThanOrEqual,
+            ExpressionType.LessThan => WhereExpressionType.LessThan,
+            ExpressionType.LessThanOrEqual => WhereExpressionType.LessThanOrEqual,
+            ExpressionType.AndAlso => WhereExpressionType.AndAlso,
+            ExpressionType.OrElse => WhereExpressionType.OrElse,
+            _ => throw new NotSupportedException($"Operator {expressionType} is not supported.")
+        };
+    }
     private static string GetGroupBy(List<GroupBy> groupBy)
     {
         return string.Join(", ", groupBy.Select(g => $"[{g.ColumnName}]"));

@@ -1,31 +1,29 @@
-﻿using System.Data.SqlTypes;
-using System.Text;
+﻿using System.Text;
 using Microsoft.Data.SqlClient;
 using QueryBuilding.Contexts;
 
 using var connection = new SqlConnection("Server=DESKTOP-OO326C9\\SQLEXPRESS01;Database=Test;User id=sa; Password=A@123456789; MultipleActiveResultSets=true;Integrated Security=True;Connect Timeout=30;Encrypt=False;TrustServerCertificate=True;ApplicationIntent=ReadWrite;MultiSubnetFailover=False;Trusted_Connection=false");
+connection.Open();
 
+int? id = 2;
+id = null;
+byte? category = 1;
+// category = null;
+string? name = "%a%";
+// name = null;
 
-int? id = null;
-byte? category = 2;
-string? name = "banana";
-var query = Set<Product>.Query();
-
-if (id is not null)
-{
-    query = query.Where(e => e.Id == id);
-}
-if (name is not null)
-{
-    query = query.Where(e => e.Name == name);
-}
-if (category is not null)
-{
-    query = query.Where(e => e.Category == category);
-}
+var query = DataTable<Product>
+        .Query()
+        .Where
+        (
+            e => e.Id == id && 
+            e.Category == category 
+        )
+        .Like(e=>e.Name == name)
+        .OrderBy(e=>e.Id)
+        .OrderByDescending(e=>e.Name);
 
 List<Product> result = await query.ToList(connection);
-
 
 var jsonResult = SampleClass.ConvertToJson(result);
 Console.WriteLine(jsonResult);
@@ -90,5 +88,13 @@ public static class SampleClass
                     .Replace("\n", "\\n")
                     .Replace("\r", "\\r")
                     .Replace("\t", "\\t");
+    }
+}
+
+public static class DataTable<T>
+{
+    public static Set<T> Query()
+    {
+        return new Set<T>();
     }
 }

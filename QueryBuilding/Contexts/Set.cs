@@ -3,6 +3,7 @@ using Dapper;
 using System.Linq.Expressions;
 using QueryBuilding.Generators;
 using QueryBuilding.Models;
+using System.Text.Json;
 
 namespace QueryBuilding.Contexts;
 
@@ -22,12 +23,13 @@ public class Set<T>
         _where.Add(action);
         foreach (Specification item in SpecificationGenerator.GetSpecification(action))
         {
+            // System.Console.WriteLine(JsonSerializer.Serialize(item));
             _whereClause.Add
             (
                 new()
                 {
                     Column = item.Left,
-                    ExpressionType = item.ExpressionType,
+                    ExpressionType = SqlServerQueryGenerator.GetWhereExpressionType(item.ExpressionType),
                     Value = item.Right
                 }
             );
@@ -35,13 +37,30 @@ public class Set<T>
         }
         return this;
     }
-    public Set<T> OrderByAscending(Expression<Func<T, object>> action)
+    public Set<T> OrderBy(Expression<Func<T, object>> action)
     {
         _orderBy.Add(new()
         {
             ColumnName = PropertyNameGenerator.GetPropertyName(action),
             OrderByType = OrderByType.ASC
         });
+        return this;
+    }
+    public Set<T> Like(Expression<Func<T, bool>> action)
+    {
+        foreach (Specification item in SpecificationGenerator.GetSpecification(action))
+        {
+            _whereClause.Add
+            (
+                new()
+                {
+                    Column = item.Left,
+                    ExpressionType = WhereExpressionType.Like,
+                    Value = item.Right
+                }
+            );
+
+        }
         return this;
     }
     public Set<T> OrderByDescending(Expression<Func<T, object>> action)
@@ -102,7 +121,7 @@ public class Set<T>
         {
             System.Console.WriteLine($"{item.Key} = {item.Value}");
         }
-        var result = await connection.QueryAsync<T>(generated.sql,generated.parameters);
+        var result = await connection.QueryAsync<T>(generated.sql, generated.parameters);
         return result.ToList();
     }
     public static Set<T> Query()
